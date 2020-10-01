@@ -4,6 +4,11 @@ A personal thought experiment to see what writing a golang version of autocannon
 
 ![comparison image](autocannon-comparison.png)
 
+## Usage
+```
+go build && ./autocannon-go --connections=1 --pipelining=1 --duration=10 --uri=http://localhost:8081/good1
+```
+
 ## Installing published binaries
 
 Binaries are published in the format: `https://github.com/glentiki/autocannon-go/releases/download/$GIT_TAG/autocannon-go-$SYSTEM-$PLAFORM`

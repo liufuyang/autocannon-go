@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -214,27 +215,47 @@ func runClients(ctx goprocess.Process, clients int, pipeliningFactor int, timeou
 
 		for j := 0; j < pipeliningFactor; j++ {
 			go func() {
-				req := fasthttp.AcquireRequest()
-				req.SetBody([]byte("hello, world!"))
-				req.SetRequestURI(uri)
+				reqGet := fasthttp.AcquireRequest()
+				reqGet.SetBody([]byte(""))
+				reqGet.SetRequestURI(uri)
 
-				res := fasthttp.AcquireResponse()
+				resGet := fasthttp.AcquireResponse()
 
 				for {
 					startTime := time.Now()
-					if err := c.DoTimeout(req, res, timeout); err != nil {
+					if err := c.DoTimeout(reqGet, resGet, timeout); err != nil {
 						errChan <- err
 					} else {
-						size := len(res.Body()) + 2
-						res.Header.VisitAll(func(key, value []byte) {
+						body := resGet.Body()
+						size := len(body) + 2
+						resGet.Header.VisitAll(func(key, value []byte) {
 							size += len(key) + len(value) + 2
 						})
 						respChan <- &resp{
-							status:  res.Header.StatusCode(),
+							status:  resGet.Header.StatusCode(),
 							latency: time.Now().Sub(startTime).Milliseconds(),
 							size:    size,
 						}
-						res.Reset()
+						resGet.Reset()
+
+						// Send post below:
+						i, err := strconv.Atoi(string(body))
+						if err != nil {
+							// fmt.Println("Atoi err:", err)
+							i = 0
+						}
+						// fmt.Println("post: ", i + 1)
+						reqPost := fasthttp.AcquireRequest()
+						reqPost.SetBodyString(strconv.Itoa(i + 1))
+						reqPost.Header.SetMethod("POST")
+						reqPost.SetRequestURI(uri)
+
+						resPost := fasthttp.AcquireResponse()
+						if err := c.DoTimeout(reqPost, resPost, timeout); err != nil {
+							errChan <- err
+						} else {
+							reqPost.Reset()
+						}
 					}
 				}
 			}()
