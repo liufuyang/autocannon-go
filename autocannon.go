@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"math/rand"
 	"net/url"
 	"os"
 	"strconv"
@@ -201,9 +202,15 @@ func formatBigNum(i float64) string {
 	return fmt.Sprintf("%.0fk", math.Round(i/1000))
 }
 
-func runClients(ctx goprocess.Process, clients int, pipeliningFactor int, timeout time.Duration, uri string) (<-chan *resp, <-chan error) {
+const ranKeyRange int = 100000
+
+func runClients(ctx goprocess.Process, clients int, pipeliningFactor int, timeout time.Duration, uriIncoming string) (<-chan *resp, <-chan error) {
 	respChan := make(chan *resp, 2*clients*pipeliningFactor)
 	errChan := make(chan error, 2*clients*pipeliningFactor)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	uri := fmt.Sprintf("%s/%d", uriIncoming, r1.Intn(ranKeyRange))
 	u, _ := url.Parse(uri)
 
 	for i := 0; i < clients; i++ {
@@ -215,13 +222,14 @@ func runClients(ctx goprocess.Process, clients int, pipeliningFactor int, timeou
 
 		for j := 0; j < pipeliningFactor; j++ {
 			go func() {
-				reqGet := fasthttp.AcquireRequest()
-				reqGet.SetBody([]byte(""))
-				reqGet.SetRequestURI(uri)
-
-				resGet := fasthttp.AcquireResponse()
-
 				for {
+					reqGet := fasthttp.AcquireRequest()
+					reqGet.SetBody([]byte(""))
+					uri = fmt.Sprintf("%s/%d", uriIncoming, r1.Intn(ranKeyRange))
+					reqGet.SetRequestURI(uri)
+
+					resGet := fasthttp.AcquireResponse()
+
 					startTime := time.Now()
 					if err := c.DoTimeout(reqGet, resGet, timeout); err != nil {
 						errChan <- err
@@ -248,6 +256,7 @@ func runClients(ctx goprocess.Process, clients int, pipeliningFactor int, timeou
 						reqPost := fasthttp.AcquireRequest()
 						reqPost.SetBodyString(strconv.Itoa(i + 1))
 						reqPost.Header.SetMethod("POST")
+						uri = fmt.Sprintf("%s/%d", uriIncoming, r1.Intn(ranKeyRange))
 						reqPost.SetRequestURI(uri)
 
 						resPost := fasthttp.AcquireResponse()
