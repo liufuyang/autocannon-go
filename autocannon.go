@@ -182,7 +182,6 @@ func main() {
 			})
 			shortLatency.Render()
 			fmt.Println("")
-			fmt.Println("")
 
 			requestsTable := tablewriter.NewWriter(os.Stdout)
 			requestsTable.SetRowSeparator("-")
@@ -229,7 +228,6 @@ func main() {
 			fmt.Println("")
 			fmt.Println("Req/Bytes counts sampled once per second.")
 			fmt.Println("")
-			fmt.Println("")
 			fmt.Println(fmt.Sprintf("%v 2xx responses, %v non 2xx responses.", resp2xx, respN2xx))
 			fmt.Println(fmt.Sprintf("%v total requests in %v seconds, %s read for GET.", formatBigNum(float64(totalResp)), *runtime, humanize.Bytes(uint64(totalBytes))))
 			if errors > 0 {
@@ -237,6 +235,7 @@ func main() {
 			}
 
 			// write
+			fmt.Println("")
 			fmt.Println("")
 			fmt.Println("---------- Write/POST ----------")
 			fmt.Println("")
@@ -271,7 +270,6 @@ func main() {
 				fmt.Sprintf("%v ms", latenciesPost.Max()),
 			})
 			shortLatencyWrite.Render()
-			fmt.Println("")
 			fmt.Println("")
 
 			requestsTableWrite := tablewriter.NewWriter(os.Stdout)
@@ -318,7 +316,6 @@ func main() {
 
 			fmt.Println("")
 			fmt.Println("Req/Bytes counts sampled once per second.")
-			fmt.Println("")
 			fmt.Println("")
 			fmt.Println(fmt.Sprintf("%v 2xx responses, %v non 2xx responses.", resp2xxPost, respN2xxPost))
 			fmt.Println(fmt.Sprintf("%v total requests in %v seconds, %s read for POST.", formatBigNum(float64(totalRespPost)), *runtime, humanize.Bytes(uint64(totalBytesPost))))

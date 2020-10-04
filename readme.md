@@ -4,9 +4,10 @@ A personal thought experiment to see what writing a golang version of autocannon
 
 ![comparison image](autocannon-comparison.png)
 
-## Usage
+## Usage (to test http-kv project)
+See info [http-kv](https://github.com/liufuyang/http-kv)
 ```
-go build && ./autocannon-go --connections=1 --pipelining=1 --duration=10 --uri=http://localhost:8081/good1
+go build && ./autocannon-go --connections=1 --pipelining=1 --duration=10 --uri=http://localhost:8081
 ```
 
 ## Installing published binaries
